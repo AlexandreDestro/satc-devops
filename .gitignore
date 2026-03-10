@@ -37,3 +37,9 @@ next-env.d.ts
 
 # log
 .log*
+
+
+#framework test
+hugo-site
+eleventy-site
+astro-site
