@@ -117,12 +117,14 @@
 
         let pipes = [];
         let dots = [];
+        let enemyDots = [];
         let projectiles = [];
         let score = 0;
         let highScore = 0;
         let gameRunning = false;
         let gameOver = false;
         let gameTicks = 0; // used to ramp speed over time
+        let lastShootTime = 0; // for shooting cooldown
 
         // Pipe settings
         const pipeWidth = 60;
@@ -133,12 +135,14 @@
         const speedIncrementAmount = 0.1;
         const dotSize = 30;
         const dotScore = 5;
+        const enemyDotSize = 65;
         const projSize = 8;
         const projSpeed = 6;
         const projScore = 2;
 
         function drawBird() {
-            ctx.fillStyle = '#FFD700';
+            const inCooldown = Date.now() - lastShootTime < 1000;
+            ctx.fillStyle = inCooldown ? '#D7B700' : '#FFD700'; // red during cooldown
             ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
 
             // Draw bird eye
@@ -183,6 +187,15 @@
             });
         }
 
+        function createEnemyDot() {
+            // spawn enemy dot somewhere in vertical gap area
+            const y = Math.random() * (canvas.height - enemyDotSize - 40) + 20;
+            enemyDots.push({
+                x: canvas.width + pipeSpacing/2,
+                y: y
+            });
+        }
+
         function updateBird() {
             bird.velocity += bird.gravity;
             bird.y += bird.velocity;
@@ -205,6 +218,8 @@
                 createPipe();
                 // occasionally create a dot along with a pipe
                 if (Math.random() < 0.9) createDot();
+                // occasionally create an enemy dot
+                if (Math.random() < 0.3) createEnemyDot();
             }
         }
 
@@ -214,6 +229,16 @@
                 // remove off-screen dots
                 if (dots[i].x + dotSize < 0) {
                     dots.splice(i, 1);
+                }
+            }
+        }
+
+        function updateEnemyDots() {
+            for (let i = enemyDots.length - 1; i >= 0; i--) {
+                enemyDots[i].x -= pipeSpeed;
+                // remove off-screen enemy dots
+                if (enemyDots[i].x + enemyDotSize < 0) {
+                    enemyDots.splice(i, 1);
                 }
             }
         }
@@ -245,29 +270,20 @@
         function checkProjectileCollisions() {
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 let p = projectiles[i];
-                for (let j = pipes.length - 1; j >= 0; j--) {
-                    let pipe = pipes[j];
-                    // treat pipe as two rectangles (top and bottom)
-                    if (p.x < pipe.x + pipeWidth &&
-                        p.x + projSize > pipe.x) {
-                        // check top
-                        if (p.y < pipe.topHeight) {
-                            // hit top pipe
-                            projectiles.splice(i, 1);
-                            pipes.splice(j, 1);
-                            score += projScore;
-                            scoreElement.textContent = score;
-                            break;
-                        }
-                        // check bottom
-                        const bottomY = canvas.height - (canvas.height - pipe.topHeight - pipeGap);
-                        if (p.y + projSize > bottomY) {
-                            projectiles.splice(i, 1);
-                            pipes.splice(j, 1);
-                            score += projScore;
-                            scoreElement.textContent = score;
-                            break;
-                        }
+
+                // Check enemy dot collisions
+                for (let k = enemyDots.length - 1; k >= 0; k--) {
+                    let ed = enemyDots[k];
+                    if (p.x < ed.x + enemyDotSize &&
+                        p.x + projSize > ed.x &&
+                        p.y < ed.y + enemyDotSize &&
+                        p.y + projSize > ed.y) {
+                        // hit enemy dot
+                        projectiles.splice(i, 1);
+                        enemyDots.splice(k, 1);
+                        score += projScore; // same score as destroying pipes
+                        scoreElement.textContent = score;
+                        break;
                     }
                 }
             }
@@ -285,6 +301,16 @@
                     bird.x + bird.width > pipe.x &&
                     (bird.y < pipe.topHeight ||
                      bird.y + bird.height > canvas.height - (canvas.height - pipe.topHeight - pipeGap))) {
+                    return true;
+                }
+            }
+
+            // Enemy dot collision
+            for (let ed of enemyDots) {
+                if (bird.x < ed.x + enemyDotSize &&
+                    bird.x + bird.width > ed.x &&
+                    bird.y < ed.y + enemyDotSize &&
+                    bird.y + bird.height > ed.y) {
                     return true;
                 }
             }
@@ -334,6 +360,14 @@
                 ctx.fill();
             }
 
+            // draw enemy dots
+            for (let ed of enemyDots) {
+                ctx.fillStyle = '#FF0000';
+                ctx.beginPath();
+                ctx.arc(ed.x + enemyDotSize/2, ed.y + enemyDotSize/2, enemyDotSize/2, 0, Math.PI*2);
+                ctx.fill();
+            }
+
             // Draw bird
             drawBird();
 
@@ -354,6 +388,7 @@
             updateBird();
             updatePipes();
             updateDots();
+            updateEnemyDots();
             updateProjectiles();
             checkDotCollision();
             checkProjectileCollisions();
@@ -385,6 +420,7 @@
             bird.y = 300;
             bird.velocity = 0;
             pipes = [];
+            enemyDots = [];
             score = 0;
             scoreElement.textContent = score;
             // refresh the high score display from storage
@@ -425,8 +461,9 @@
                 }
             }
             // 'S' key to shoot
-            if (e.code === 'KeyS' && gameRunning) {
+            if (e.code === 'KeyS' && gameRunning && Date.now() - lastShootTime >= 2000) {
                 createProjectile();
+                lastShootTime = Date.now();
             }
         });
 
