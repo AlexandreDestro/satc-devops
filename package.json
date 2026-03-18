@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "lint": "^0.8.19",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"
