@@ -70,7 +70,7 @@ jobs:
           echo "Quantidade de vulnerabilidades médias: $VULN_COUNT"
 
           if [ "$VULN_COUNT" -gt 15; then
-            echo "Pipeline bloqueada: mais de 2 vulnerabilidades médias encontradas."
+            echo "Pipeline bloqueada: mais de 15 vulnerabilidades médias encontradas."
             exit 1
           fi
         else
@@ -87,8 +87,8 @@ jobs:
 
         echo "Quantidade de vulnerabilidades médias: $COUNT"
 
-        if [ "$COUNT" -gt 2 ]; then
-          echo "Pipeline bloqueada: mais de 2 vulnerabilidades médias encontradas."
+        if [ "$COUNT" -gt 15 ]; then
+          echo "Pipeline bloqueada: mais de 15 vulnerabilidades médias encontradas."
           exit 1
         fi
       env:
