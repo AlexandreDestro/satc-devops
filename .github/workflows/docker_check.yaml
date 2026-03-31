@@ -17,7 +17,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build Docker image
-      run: docker build -t alexandredestro/satc-devops:0.0.1
+      run: docker build -t alexandredestro/satc-devops:0.0.1 -f path/to/Dockerfile .
 
   
   
