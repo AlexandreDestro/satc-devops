@@ -37,7 +37,7 @@ jobs:
       uses: SonarSource/sonarcloud-github-action@v2
       with:
         args: >
-          -Dsonar.projectKey=alexandredestro_satc-devops
+          -Dsonar.projectKey=AlexandreDestro_satc-devops
           -Dsonar.organization=alexandredestro
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.sources=.
@@ -82,7 +82,7 @@ jobs:
     - name: Fail if too many Sonar vulnerabilities
       run: |
         COUNT=$(curl -s -u "${SONAR_TOKEN}:" \
-          "https://sonarcloud.io/api/issues/search?componentKeys=alexandredestro_satc-devops&types=VULNERABILITY&severities=MAJOR&resolved=false&ps=1" \
+          "https://sonarcloud.io/api/issues/search?componentKeys=AlexandreDestro_satc-devops&types=VULNERABILITY&severities=MAJOR&resolved=false&ps=1" \
           | jq '.total')
 
         echo "Quantidade de vulnerabilidades médias: $COUNT"
