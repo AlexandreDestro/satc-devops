@@ -37,7 +37,7 @@ jobs:
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'image'
-        image-ref: 'docker.io/usuario/satc-devops:0.0.2'
+        image-ref: 'docker.io/alexandredestro/satc-devops:0.0.2'
         format: json
         output: trivy-results.json
         severity: MEDIUM,HIGH,CRITICAL
@@ -59,7 +59,7 @@ jobs:
             exit 1
           fi
         else
-          echo "Arquivo de resultados do Trivy nÃ£o encontrado."
+          echo "Arquivo de resultados do Trivy não encontrado."
           exit 1
         fi
 
@@ -78,5 +78,5 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: https://sonarcloud.io
-        SONAR_PROJECT_KEY: usuario
+        SONAR_PROJECT_KEY: alexandredestro
 
